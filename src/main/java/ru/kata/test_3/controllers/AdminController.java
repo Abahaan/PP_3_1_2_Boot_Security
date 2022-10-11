@@ -1,6 +1,7 @@
 package ru.kata.test_3.controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -21,35 +22,17 @@ public class AdminController {
         this.roleService = roleService;
     }
     @GetMapping
-    public String showMainAdminPage (Model model){
+    public String showMainAdminPage (@AuthenticationPrincipal User principal, Model model){
+        model.addAttribute("principal",principal);
         model.addAttribute("userList", userService.getAllUsers());
         model.addAttribute("roleUser", roleService.getRoleByName("ROLE_USER"));
         model.addAttribute("roleAdmin", roleService.getRoleByName("ROLE_ADMIN"));
+        model.addAttribute("newUser", new User());
         return "main";
     }
 
-    @GetMapping("/{id}")
-    public String showUserInfoPage(@PathVariable Long id, Model model) {
-        model.addAttribute("user", userService.getUserById(id));
-        return "user";
-    }
-
-    @GetMapping("/createUser")
-    public String showCreateUserPage(Model model) {
-        model.addAttribute("user", new User());
-        return "createUser";
-    }
-
-    @GetMapping("/{id}/edit")
-    public String showEditUserPage(@PathVariable Long id, Model model) {
-        model.addAttribute("user", userService.getUserById(id));
-        model.addAttribute("roleUser", roleService.getRoleByName("ROLE_USER"));
-        model.addAttribute("roleAdmin", roleService.getRoleByName("ROLE_ADMIN"));
-        return "editUser";
-    }
-
-    @PostMapping
-    public String saveUser(@ModelAttribute("user") User user) {
+    @PostMapping("/save")
+    public String saveUser(@ModelAttribute("newUser") User user) {
         userService.addUser(user);
         return "redirect:/admin";
     }
