@@ -7,22 +7,22 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import ru.kata.test_3.services.UserService;
 
+
 import java.security.Principal;
 
 @Controller
-@RequestMapping("/user")
-public class UserController {
+@RequestMapping("/main")
+public class MainController {
     private final UserService userService;
 
     @Autowired
-    public UserController(UserService userService) {
+    public MainController(UserService userService) {
         this.userService = userService;
     }
 
-
     @GetMapping
-    public String user(Model model, Principal principal){
-        model.addAttribute("user", userService.getUserByName(principal.getName()));
-        return "user";
+    public String showMainPage(Model model, Principal principal) {
+        model.addAttribute("authorizedUser", userService.getUserByName(principal.getName()));
+        return "main";
     }
 }

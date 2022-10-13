@@ -16,27 +16,23 @@ import ru.kata.test_3.services.UserServiceImpl;
 @EnableWebSecurity
 public class SecurityConfig extends WebSecurityConfigurerAdapter {
 
-    private final SuccessUserHandler successUserHandler;
+
     private final UserServiceImpl userService;
 
 
     @Autowired
-    public SecurityConfig(SuccessUserHandler successUserHandler, UserServiceImpl userService) {
-        this.successUserHandler = successUserHandler;
+    public SecurityConfig( UserServiceImpl userService) {
         this.userService = userService;
     }
 
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-        http
+        http.csrf().disable()
                 .authorizeRequests()
-                .antMatchers("/admin/**").hasRole("ADMIN")
-                .antMatchers("/user/**").hasAnyRole("USER", "ADMIN")
-
-                .anyRequest().authenticated()
+                .antMatchers("/main/**").authenticated()
                 .and()
-                .formLogin().successHandler(successUserHandler)
+                .formLogin().loginPage("/").loginProcessingUrl("/perform-login").successForwardUrl("/main")
                 .permitAll()
                 .and()
                 .logout()

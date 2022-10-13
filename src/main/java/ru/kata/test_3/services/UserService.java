@@ -5,13 +5,13 @@ import ru.kata.test_3.models.User;
 import java.util.List;
 
 public interface UserService {
-    void addUser(User user);
+    boolean addUser(User user);
 
     User getUserById(Long id);
 
-    void updateUserById(User user);
+    boolean updateUser(User user);
 
-    void deleteUserById(Long id);
+    boolean deleteUserById(Long id);
 
     List<User> getAllUsers();
 

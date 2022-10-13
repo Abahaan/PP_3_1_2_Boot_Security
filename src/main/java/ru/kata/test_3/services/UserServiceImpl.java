@@ -11,6 +11,7 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.kata.test_3.models.User;
 import ru.kata.test_3.repositories.UserRepo;
 
+import java.security.InvalidParameterException;
 import java.util.List;
 
 @Service
@@ -39,12 +40,14 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     @Transactional
-    public void addUser(User user) {
+    public boolean addUser(User user) {
         User userFromDB = userRepo.findByUsername(user.getUsername());
-        if (userFromDB == null) {
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            userRepo.save(user);
+        if (userFromDB != null) {
+            return false;
         }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        userRepo.save(user);
+        return true;
     }
 
     @Override
@@ -54,23 +57,29 @@ public class UserServiceImpl implements UserService, UserDetailsService {
 
     @Override
     @Transactional
-    public void updateUserById(User user) {
+    public boolean updateUser(User user) throws InvalidParameterException {
+        if (userRepo.findByUsername(user.getUsername()) != null &&
+                !userRepo.findByUsername(user.getUsername()).getId().equals(user.getId())) {
+            return false;
+        }
         if (user.getPassword().isEmpty()) {
-            user.setPassword(getUserById(user.getId()).getPassword());
+            user.setPassword(userRepo.findById(user.getId()).get().getPassword());
         } else {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
         userRepo.save(user);
+        return true;
     }
 
     @Override
     @Transactional
-    public void deleteUserById(Long id) {
-        if (userRepo.findById(id).isPresent()) {
-            userRepo.deleteById(id);
+    public boolean deleteUserById(Long id) {
+        if (userRepo.findById(id).isEmpty()) {
+            return false;
         }
+        userRepo.deleteById(id);
+        return true;
     }
-
     @Override
     public List<User> getAllUsers() {
         return userRepo.findAll();
