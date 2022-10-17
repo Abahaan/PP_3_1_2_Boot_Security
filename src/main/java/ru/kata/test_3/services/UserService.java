@@ -1,10 +1,13 @@
 package ru.kata.test_3.services;
 
+
+
 import ru.kata.test_3.models.User;
 
 import java.util.List;
 
 public interface UserService {
+
     boolean addUser(User user);
 
     User getUserById(Long id);
@@ -15,5 +18,5 @@ public interface UserService {
 
     List<User> getAllUsers();
 
-    User getUserByName(String name);
+    User getUserByUsername(String name);
 }

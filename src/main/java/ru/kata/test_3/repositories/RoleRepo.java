@@ -5,6 +5,5 @@ import org.springframework.stereotype.Repository;
 import ru.kata.test_3.models.Role;
 @Repository
 public interface RoleRepo extends JpaRepository<Role,Long> {
-    Role findByName(String name);
 
 }

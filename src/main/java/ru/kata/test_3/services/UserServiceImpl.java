@@ -11,82 +11,84 @@ import org.springframework.transaction.annotation.Transactional;
 import ru.kata.test_3.models.User;
 import ru.kata.test_3.repositories.UserRepo;
 
+
 import java.security.InvalidParameterException;
 import java.util.List;
 
 @Service
-@Transactional(readOnly = true)
 public class UserServiceImpl implements UserService, UserDetailsService {
-
-    private final UserRepo userRepo;
-
+    private final UserRepo userRepository;
     private final PasswordEncoder passwordEncoder;
 
     @Autowired
-    public UserServiceImpl(UserRepo userRepo, @Lazy PasswordEncoder passwordEncoder) {
-        this.userRepo = userRepo;
+    public UserServiceImpl(UserRepo userRepository, @Lazy PasswordEncoder passwordEncoder) {
+        this.userRepository = userRepository;
         this.passwordEncoder = passwordEncoder;
-    }
-
-
-    @Override
-    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        User user = getUserByName(username);
-        if (user == null) {
-            throw new UsernameNotFoundException(String.format("User '%s' not found", username));
-        }
-        return user;
     }
 
     @Override
     @Transactional
     public boolean addUser(User user) {
-        User userFromDB = userRepo.findByUsername(user.getUsername());
+        User userFromDB = userRepository.findByUsername(user.getUsername());
         if (userFromDB != null) {
             return false;
         }
         user.setPassword(passwordEncoder.encode(user.getPassword()));
-        userRepo.save(user);
+        userRepository.save(user);
         return true;
     }
 
     @Override
+    @Transactional(readOnly = true)
     public User getUserById(Long id) {
-        return userRepo.getReferenceById(id);
+        return userRepository.findById(id).get();
     }
 
     @Override
     @Transactional
     public boolean updateUser(User user) throws InvalidParameterException {
-        if (userRepo.findByUsername(user.getUsername()) != null &&
-                !userRepo.findByUsername(user.getUsername()).getId().equals(user.getId())) {
+        if (userRepository.findByUsername(user.getUsername()) != null &&
+                !userRepository.findByUsername(user.getUsername()).getId().equals(user.getId())) {
             return false;
         }
         if (user.getPassword().isEmpty()) {
-            user.setPassword(userRepo.findById(user.getId()).get().getPassword());
+            user.setPassword(userRepository.findById(user.getId()).get().getPassword());
         } else {
             user.setPassword(passwordEncoder.encode(user.getPassword()));
         }
-        userRepo.save(user);
+        userRepository.save(user);
         return true;
     }
 
     @Override
     @Transactional
     public boolean deleteUserById(Long id) {
-        if (userRepo.findById(id).isEmpty()) {
+        if (userRepository.findById(id).isEmpty()) {
             return false;
         }
-        userRepo.deleteById(id);
+        userRepository.deleteById(id);
         return true;
-    }
-    @Override
-    public List<User> getAllUsers() {
-        return userRepo.findAll();
     }
 
     @Override
-    public User getUserByName(String username) {
-        return userRepo.findByUsername(username);
+    @Transactional(readOnly = true)
+    public List<User> getAllUsers() {
+        return userRepository.findAll();
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public User getUserByUsername(String username) {
+        return userRepository.findByUsername(username);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+        User user = getUserByUsername(username);
+        if (user == null) {
+            throw new UsernameNotFoundException(String.format("User '%s' not found", username));
+        }
+        return user;
     }
 }

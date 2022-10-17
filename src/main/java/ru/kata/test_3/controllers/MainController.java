@@ -22,7 +22,7 @@ public class MainController {
 
     @GetMapping
     public String showMainPage(Model model, Principal principal) {
-        model.addAttribute("authorizedUser", userService.getUserByName(principal.getName()));
+        model.addAttribute("authorizedUser", userService.getUserByUsername(principal.getName()));
         return "main";
     }
 }
